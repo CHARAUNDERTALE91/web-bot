@@ -8,13 +8,27 @@ const OR_BASE = 'https://api.z.ai/v1';
 
 // z.ai GLM models
 const MODELS = {
-  'glm-z1-flash':  { max: 131072, name: 'GLM Z1 Flash (Free)' },
-  'glm-4-flash':   { max: 131072, name: 'GLM-4 Flash (Free)'  },
-  'glm-4-flashx':  { max: 131072, name: 'GLM-4 FlashX'        },
-  'glm-4':         { max: 131072, name: 'GLM-4'               },
+  'glm-z1-flash':  { max: 131072, name: 'GLM Z1 Flash' },
+  'glm-4-flash':   { max: 131072, name: 'GLM-4 Flash'  },
+  'glm-4-flashx':  { max: 131072, name: 'GLM-4 FlashX' },
+  'glm-4':         { max: 131072, name: 'GLM-4'        },
 };
 
 const DEFAULT_MODEL = 'glm-z1-flash';
+
+// Fetch dengan timeout
+async function fetchWithTimeout(url, options, ms = 25000) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { ...options, signal: ctrl.signal });
+    clearTimeout(tid);
+    return res;
+  } catch(e) {
+    clearTimeout(tid);
+    throw e.name === 'AbortError' ? new Error('Request timeout (25s). Coba lagi.') : e;
+  }
+}
 
 async function buildSystem(customPersona) {
   const { data: knowledge } = await supabase
@@ -71,16 +85,19 @@ router.post('/', async (req, res) => {
     const systemContent = await buildSystem(persona);
     const messages = buildMessages(systemContent, history, message);
 
-    const resp = await fetch(`${OR_BASE}/chat/completions`, {
+    const resp = await fetchWithTimeout(`${OR_BASE}/chat/completions`, {
       method:  'POST',
       headers: orHeaders(),
-      body: JSON.stringify({ model: modelId, messages, max_tokens: maxTok, temperature: temp }),
-    });
+      body: JSON.stringify({ model: modelId, messages, max_tokens: Math.min(maxTok, 2048), temperature: temp }),
+    }, 25000);
 
     const data = await resp.json();
+    console.log('[z.ai response]', JSON.stringify(data).slice(0, 500));
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-    const reply = data.choices[0].message.content;
+    const msg = data.choices[0].message;
+    // GLM kadang pakai reasoning_content atau content
+    const reply = msg.content || msg.reasoning_content || msg.tool_calls?.[0]?.function?.arguments || JSON.stringify(msg);
     const usage = data.usage;
 
     supabase.from('sessions').insert([{
@@ -115,15 +132,15 @@ router.post('/stream', async (req, res) => {
     res.setHeader('X-Accel-Buffering','no');
     res.flushHeaders();
 
-    const upstream = await fetch(`${OR_BASE}/chat/completions`, {
+    const upstream = await fetchWithTimeout(`${OR_BASE}/chat/completions`, {
       method:  'POST',
       headers: orHeaders(),
       body: JSON.stringify({
         model: modelId, messages,
-        max_tokens: maxTok, temperature: temp,
+        max_tokens: Math.min(maxTok, 2048), temperature: temp,
         stream: true,
       }),
-    });
+    }, 25000);
 
     if (!upstream.ok) {
       const errText = await upstream.text();
