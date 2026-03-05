@@ -795,7 +795,7 @@ input[type="range"]::-webkit-slider-thumb{
     <div class="tb-r">
       <button class="model-chip" onclick="openPan('model')" title="Switch model">
         <span class="model-dot"></span>
-        <span id="mChipName">glm-4</span>
+        <span id="mChipName">llama-3.3-70b</span>
         <span style="color:var(--muted)">▾</span>
       </button>
       <button class="tb-icon" onclick="toggleSearch()" title="Search in chat [Ctrl+F]">⌕</button>
@@ -948,12 +948,11 @@ input[type="range"]::-webkit-slider-thumb{
 
 // ── CONFIG ──
 const CFG = {
-  apiKey: localStorage.getItem('apiKey') || 'bos-public-key-2026',
+  apiKey: localStorage.getItem('apiKey') || 'GANTI_API_KEY_LO',
   models: [
-    {id:'glm-z1-flash', name:'GLM Z1 Flash', max:131072},
     {id:'glm-4-flash',  name:'GLM-4 Flash',  max:131072},
     {id:'glm-4-flashx', name:'GLM-4 FlashX', max:131072},
-    {id:'glm-4',        name:'GLM-4',        max:131072},
+    {id:'glm-4-plus',   name:'GLM-4 Plus',   max:131072},
   ],
   mi:       0,
   stream:   true,
