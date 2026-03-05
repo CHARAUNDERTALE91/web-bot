@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatBot</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 700px;
+      height: 100vh;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 30px rgba(0,0,0,0.08);
+    }
+    .header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 40px; height: 40px;
+      background: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+    .header-info h2 { font-size: 16px; font-weight: 600; }
+    .header-info span { font-size: 12px; color: #22c55e; }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .message {
+      display: flex;
+      gap: 10px;
+      max-width: 85%;
+    }
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+    .bubble {
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .message.bot .bubble {
+      background: #f3f4f6;
+      color: #111;
+      border-bottom-left-radius: 4px;
+    }
+    .message.user .bubble {
+      background: #000;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .typing .bubble {
+      background: #f3f4f6;
+      color: #999;
+      font-style: italic;
+    }
+    .input-area {
+      padding: 16px 24px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 24px;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input:focus { border-color: #000; }
+    button {
+      width: 44px; height: 44px;
+      background: #000;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.8; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="avatar">🤖</div>
+    <div class="header-info">
+      <h2>AI Assistant</h2>
+      <span>● Online</span>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="message bot">
+      <div class="bubble">Halo! Ada yang bisa aku bantu? 😊</div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input 
+      type="text" 
+      id="input" 
+      placeholder="Ketik pesan..."
+      onkeypress="if(event.key==='Enter') sendMessage()"
+    />
+    <button onclick="sendMessage()" id="btn">➤</button>
+  </div>
+</div>
+
+<script>
+  const API_KEY = 'bos-public-key-2026';
+
+  async function sendMessage() {
+    const input = document.getElementById('input');
+    const btn = document.getElementById('btn');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    addMessage(msg, 'user');
+    input.value = '';
+    btn.disabled = true;
+
+    const typing = addMessage('Sedang mengetik...', 'bot typing');
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': API_KEY
+        },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const data = await res.json();
+      typing.remove();
+      addMessage(data.reply || data.error, 'bot');
+    } catch (err) {
+      typing.remove();
+      addMessage('Waduh, ada error nih! 😅', 'bot');
+    }
+
+    btn.disabled = false;
+  }
+
+  function addMessage(text, type) {
+    const messages = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    div.innerHTML = `<div class="bubble">${text}</div>`;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+</script>
+</body>
+</html>

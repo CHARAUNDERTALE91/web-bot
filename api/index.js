@@ -1,9 +1,11 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const { limiter } = require('../middleware/rateLimiter');
 const authMiddleware = require('../middleware/auth');
 const knowledgeRoutes = require('../routes/knowledge');
 const webhookRoutes = require('../routes/webhook');
+const chatRoutes = require('../routes/chat');
 
 const app = express();
 app.use(express.json());
@@ -11,24 +13,13 @@ app.use(express.json());
 // Global rate limit
 app.use(limiter);
 
-// ROOT
+// Serve UI — halaman chat
 app.get('/', (req, res) => {
-  res.json({
-    status: '🔥 Bot API Live!',
-    version: '2.0.0',
-    endpoints: {
-      public: ['GET /knowledge', 'GET /knowledge/search?q='],
-      webhook: ['POST /webhook (x-api-key required)'],
-      owner_only: [
-        'POST /knowledge (x-owner-key)',
-        'PUT /knowledge/:id (x-owner-key)',
-        'DELETE /knowledge/:id (x-owner-key)'
-      ]
-    }
-  });
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Routes
+app.use('/chat', authMiddleware, chatRoutes);
 app.use('/knowledge', authMiddleware, knowledgeRoutes);
 app.use('/webhook', authMiddleware, webhookRoutes);
 
