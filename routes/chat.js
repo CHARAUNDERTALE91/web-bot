@@ -3,7 +3,7 @@ const router   = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-const ZAI_URL  = 'https://api.z.ai/v1/chat/completions';
+const ZAI_URL  = 'https://api.z.ai/api/paas/v4/chat/completions';
 
 const MODELS = {
   'glm-z1-flash': { max: 4096, name: 'GLM Z1 Flash' },
