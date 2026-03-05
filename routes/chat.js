@@ -6,12 +6,12 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 const ZAI_URL  = 'https://api.z.ai/api/paas/v4/chat/completions';
 
 const MODELS = {
-  'glm-z1-flash': { max: 4096, name: 'GLM Z1 Flash' },
-  'glm-4-flash':  { max: 4096, name: 'GLM-4 Flash'  },
-  'glm-4-flashx': { max: 4096, name: 'GLM-4 FlashX' },
-  'glm-4':        { max: 4096, name: 'GLM-4'        },
+  'glm-4-flash': { max: 131072, name: 'GLM-4 Flash' },
+  
+  'glm-4-flashx': { max: 131072, name: 'GLM-4 FlashX' },
+  'glm-4-plus': { max: 131072, name: 'GLM-4 Plus' },
 };
-const DEFAULT_MODEL = 'glm-z1-flash';
+const DEFAULT_MODEL = 'glm-4-flash';
 
 // ── Build system prompt + knowledge ──
 async function buildSystem(persona) {
