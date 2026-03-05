@@ -1,0 +1,17 @@
+{
+  "name": "∎ AI Assistant",
+  "short_name": "∎ AI",
+  "description": "Personal AI with Knowledge Base",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23080808' rx='28'/%3E%3Ctext x='96' y='138' font-size='110' text-anchor='middle' fill='%23f5f5f0' font-family='Georgia'%3E∎%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

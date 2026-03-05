@@ -1,23 +1,15 @@
-const rateLimit = require('express-rate-limit');
+const hits = {};
+const WINDOW = 60 * 1000; // 1 minute
+const MAX    = 60;         // 60 req/min per IP
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 menit
-  max: 100,                  // max 100 request per 15 menit
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    error: '🛑 Too many requests! Slow down Bos~',
-    retry_after: '15 minutes'
+exports.limiter = (req, res, next) => {
+  const ip  = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  if (!hits[ip]) hits[ip] = [];
+  hits[ip] = hits[ip].filter(t => now - t < WINDOW);
+  if (hits[ip].length >= MAX) {
+    return res.status(429).json({ error: 'Too many requests. Wait a minute.' });
   }
-});
-
-// Strict limiter buat endpoint sensitif
-const strictLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 menit
-  max: 10,
-  message: {
-    error: '🛑 Endpoint ini super limited! Max 10/menit',
-  }
-});
-
-module.exports = { limiter, strictLimiter };
+  hits[ip].push(now);
+  next();
+};

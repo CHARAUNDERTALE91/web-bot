@@ -1,20 +1,22 @@
 {
   "name": "web-bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "3.1.0",
+  "description": "Personal AI Assistant with Termux CLI Knowledge Manager",
+  "main": "api/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node api/index.js",
+    "dev": "node api/index.js",
+    "know": "node cli/know.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "@supabase/supabase-js": "^2.98.0",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.2.1",
-    "groq-sdk": "^0.37.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "groq-sdk": "^0.3.3",
+    "mammoth": "^1.6.0",
+    "pdf-parse": "^1.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
